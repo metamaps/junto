@@ -22,14 +22,6 @@ module.exports = {
 			flatten: true,
 			filter: 'isFile'
 		}, {
-			src: 'maps/*',
-			expand: true,
-			dest: 'serve/json/'
-		}, {
-			src: 'metacodes/*',
-			expand: true,
-			dest: 'serve/json/'
-		}, {
 			src: 'img/**/*',
 			expand: true,
 			dest: 'serve/img',
@@ -42,27 +34,27 @@ module.exports = {
 		files: [{
 			src: 'lib/**/*',
 			expand: true,
-			dest: 'deploy/maprenderer/static/js/ds/',
+			dest: 'deploy/junto/static/js/',
 			flatten: true,
 			nonull: true,
 			filter: 'isFile'
 		}, {
 			src: 'css/*',
 			expand: true,
-			dest: 'deploy/maprenderer/static/css/',
+			dest: 'deploy/junto/static/css/',
 			flatten: true,
 			nonull: true,
 			filter: 'isFile'
 		}, {
 			src: 'img/*',
 			expand: true,
-			dest: 'deploy/maprenderer/static/img/',
+			dest: 'deploy/junto/static/img/',
 			flatten: true,
 			nonull: true,
 			filter: 'isFile'
 		}, {
-			src: 'dist/metamaps_renderer.js',
-			dest: 'deploy/maprenderer/static/js/dist/metamaps_renderer.js'
+			src: 'dist/junto.js',
+			dest: 'deploy/junto/static/js/dist/junto.js'
 		}]
 	}
 };

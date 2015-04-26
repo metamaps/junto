@@ -5,6 +5,6 @@ module.exports =
 	},
 	dist: {
 		src: '<%= concat.dist.dest %>',
-		dest: 'dist/metamaps_renderer.min.js'
+		dest: 'dist/junto.min.js'
 	}
 };

@@ -1,16 +1,16 @@
 {
-  "name": "metamaps",
-  "version": "0.1.0",
+  "name": "Junto",
+  "version": "0.0.1",
   "authors": [
     "Connor Turland <connorturland@gmail.com>"
   ],
-  "description": "Map Complexity",
-  "main": "metamaps_renderer.js",
+  "description": "Discover and connect with people with similar intentions",
+  "main": "junto.js",
   "moduleType": [
     "globals"
   ],
   "license": "AGPL",
-  "homepage": "http://metamaps.cc",
+  "homepage": "http://junto.cc",
   "private": true,
   "ignore": [
     "**/.*",
@@ -20,17 +20,10 @@
     "tests"
   ],
   "dependencies": {
+    "SimpleWebRTC": "*",
     "backbone": "1.0.0",
     "underscore": "1.4.4",
-    "Countable": "~2.1.0",
-    "typeahead.js": "0.9.3",
     "socket.io-client": "0.9.11",
-    "CloudCarousel": "https://github.com/Connoropolous/CloudCarousel.git",
-    "embedly": "https://github.com/Connoropolous/embedly.git",
-    "famous": "~0.3.4",
-    "hogan": "https://github.com/Connoropolous/Hogan.git"
-  },
-  "devDependencies": {
     "jquery": "1.9.0"
   }
 }

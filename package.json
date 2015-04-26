@@ -1,9 +1,9 @@
 {
-  "name": "metamaps-map-renderer",
+  "name": "Junto",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "git@github.com:connoropolous/mapmaker.git"
+    "url": "git@github.com:metamaps/junto.git"
   },
   "dependencies": {
     "express": "*",

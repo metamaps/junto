@@ -5,7 +5,7 @@ module.exports = {
 			paths: "less/"
 		},
 		files: {
-			 "css/metamapsMapRender.css": "less/metamapsMapRenderer.less"
+			 "css/junto.css": "less/junto.less"
 		}
 	},
 	dist: {
@@ -14,7 +14,7 @@ module.exports = {
 			paths: "less/"
 		},
 		files: {
-			"css/metamapsMapRender.css": "less/metamapsMapRenderer.less"
+			"css/junto.css": "less/junto.less"
 		}
 	}
 };

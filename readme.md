@@ -1,6 +1,12 @@
 Licensed under an AGPL open source licence
 
-# Junto JS Library #
+# Junto Web Application #
+
+discover and connect with others with similar intent
+
+## GETTING ON THE SAME PAGE ABOUT THE PROJECT ##
+
+https://github.com/metamaps/junto/wiki
 
 ## GETTING SET UP TO DEV ##
 

@@ -2,6 +2,8 @@ Licensed under an AGPL open source licence
 
 # Junto Web Application #
 
+[![Join the chat at https://gitter.im/metamaps/junto](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/metamaps/junto?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 discover and connect with others with similar intent
 
 ## GETTING ON THE SAME PAGE ABOUT THE PROJECT ##

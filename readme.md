@@ -40,3 +40,5 @@ Run the development servers
 ```
 grunt serveReload
 ```
+
+Navigate your browser to `http://localhost:4000`

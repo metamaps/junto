@@ -1,6 +1,9 @@
 .topic-box {
   width: 498px;
   padding: 20px;
+  position: absolute;
+  z-index: 1;
+  bottom: 30px;
 
   .topic-display {
     position: relative;
@@ -9,10 +12,16 @@
     text-align: left;
     font-family: Helvetica, sans-serif;
 
+    .topic-title {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0 0 0 10px;
+      border-radius: 5px;
+    }
+
     button.topic-button.edit {
       position: absolute;
-      top: -17px;
-      right: -17px;
+      top: -20px;
+      left: 0px;
     }
   }
 

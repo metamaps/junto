@@ -6,6 +6,7 @@ module.exports = {
 	dist: {
 		src: [
 		  'bower_components/jquery/jquery.js',
+		  'bower_components/selectize/dist/js/standalone/selectize.min.js',
 			'bower_components/underscore/underscore.js',
 			'bower_components/backbone/backbone.js',
 			'bower_components/socket.io-client/dist/socket.io.js',
@@ -17,6 +18,7 @@ module.exports = {
 			'lib/libraries/famous.js',
 			'lib/libraries/firebase.js',
 			// we only modify code that appears below here
+			'lib/views/mapView.js',
 			'lib/views/videoView.js',
 			'lib/views/roomTopicView.js',
 			'lib/views/chatView.js',

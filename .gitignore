@@ -8,3 +8,4 @@ css/
 deploy/
 .grunt/
 bower_components/
+**/.DS_Store

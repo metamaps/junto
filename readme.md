@@ -14,6 +14,7 @@ To get this going::
 
 clone this directory, enter the directory
 ```
+git clone git@github.com:metamaps/junto.git
 cd junto
 ```
 
@@ -42,3 +43,16 @@ grunt serveReload
 ```
 
 Navigate your browser to `http://localhost:4000`
+
+Changing code within `lib` or within `less` or within `server` will all restart the server or refresh the page automagically. 
+
+Once you've made your changes, from your computer terminal run
+```
+git add .
+git commit -m "write an overview of what you changed here"
+git pull --rebase origin master
+git push origin master
+```
+
+Talk to Connor about deploying juntolive
+

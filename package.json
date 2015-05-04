@@ -27,5 +27,8 @@
     "grunt-jsduck": "^1.0.1",
     "load-grunt-config": "^0.13.0",
     "load-grunt-tasks": "^0.6.0"
+  },
+  "engines": {
+    "node": "0.10.x"
   }
 }

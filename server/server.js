@@ -6,7 +6,7 @@ var
     rtcSignalServer = require("./rtcSignalServer"),
     port = 5002,
     stunservers = [{"url": "stun:stun.l.google.com:19302"}],
-    directory = path.resolve(__dirname, '..', 'serve' + '-' + process.env.NODE_ENV);
+    directory = path.resolve(__dirname, 'serve' + '-' + process.env.NODE_ENV);
 
 // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
 var httpApp = express();

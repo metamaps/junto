@@ -38,12 +38,12 @@ module.exports = {
 		'watch'
 	],
 	deploy: [
-		'jasmine',
-		'jshint',
+		//'jasmine',
+		//'jshint',
 		'clean:deploy',
 		'concat',
 		'less:dist',
-		'uglify',
+		//'uglify',
 		'copy:deploy'
 	]
 };

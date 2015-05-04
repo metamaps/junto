@@ -5,19 +5,23 @@ module.exports = {
   dev: {
     options: {
       script: './server/server.js',
-      background: false
+      background: false,
+      port: 5002
     }
   },
   devReload: {
     options: {
       script: './server/server.js',
-      background: true
+      background: true,
+      port: 5002
     }
   },
   prod: {
     options: {
-      script: 'path/to/prod/server.js',
-      node_env: 'production'
+      script: './server/server.js',
+      node_env: 'production',
+      background: false,
+      port: 5002
     }
   }
 }

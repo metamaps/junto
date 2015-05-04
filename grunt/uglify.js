@@ -5,6 +5,6 @@ module.exports =
 	},
 	dist: {
 		src: '<%= concat.dist.dest %>',
-		dest: 'dist/junto.min.js'
+		dest: 'dist/min/junto.js'
 	}
 };

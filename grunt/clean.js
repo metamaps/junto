@@ -1,9 +1,6 @@
 module.exports = {
-	serve: ['serve/raphael/js/', 'serve/css'],
+	serve: ['serve-development/img', 'serve-development/css'],
 	deploy: [
-		'deploy/maprenderer/static/js/ds',
-		'deploy/maprenderer/static/js/dist',
-		'deploy/maprenderer/static/css/ds',
-		'deploy/maprenderer/static/img'
+		'serve-production'
 	]
 };

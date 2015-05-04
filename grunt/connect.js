@@ -3,7 +3,7 @@ module.exports = {
 		options: {
 			'debug': false,
 			'port': '4000',
-			'base': 'serve/',
+			'base': 'serve-development/',
 			open: false,
 			keepalive: false,
 			livereload: true
@@ -13,7 +13,7 @@ module.exports = {
 		options: {
 			debug: true,
 			port: '4000',
-			base: 'serve/',
+			base: 'serve-development/',
 			open: false,
 			keepalive: false
 		}
@@ -22,7 +22,7 @@ module.exports = {
 		options: {
 			debug: true,
 			port: '4000',
-			base: 'serve/',
+			base: 'serve-development/',
 			open: false,
 			keepalive: true
 		}

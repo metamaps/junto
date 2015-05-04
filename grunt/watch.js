@@ -9,7 +9,7 @@ module.exports = {
 	},*/
 	client: {
 		files: [
-			'serve/index.html',
+			'html/index.html',
 			'lib/**/*.js',
 			'less/**'
 		],

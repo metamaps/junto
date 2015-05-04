@@ -3,28 +3,42 @@ module.exports = {
 		files: [{
 			src: 'bower_components/**/*',
 			expand: true,
-			dest: 'serve/js/'
+			dest: 'serve-development/js/'
 		}]
 	},
 	serve: {
 		files: [{
-			src: 'dist/*',
+			src: 'html/index.html',
+			dest: 'serve-development',
 			expand: true,
-			dest: 'serve/js/',
+			nonull: true,
+			flatten: true,
+			filter: 'isFile'
+		}, {
+			src: 'dist/junto.js',
+			dest: 'serve-development/js',
+			expand: true,
+			nonull: true,
+			flatten: true,
+			filter: 'isFile'
+		}, {
+			src: 'lib/development/start.js',
+			dest: 'serve-development/js',
+			expand: true,
 			nonull: true,
 			flatten: true,
 			filter: 'isFile'
 		}, {
 			src: 'css/*',
 			expand: true,
-			dest: 'serve/css/',
+			dest: 'serve-development/css/',
 			nonull: true,
 			flatten: true,
 			filter: 'isFile'
 		}, {
 			src: 'img/**/*',
 			expand: true,
-			dest: 'serve/img',
+			dest: 'serve-development/img',
 			nonull: true,
 			flatten: true,
 			filter: 'isFile'
@@ -32,29 +46,45 @@ module.exports = {
 	},
 	deploy: {
 		files: [{
-			src: 'lib/**/*',
+			src: 'html/index.html',
+			dest: 'serve-production',
 			expand: true,
-			dest: 'deploy/junto/static/js/',
-			flatten: true,
 			nonull: true,
+			flatten: true,
+			filter: 'isFile'
+		}, {
+			src: 'dist/junto.js',
+			dest: 'serve-production/js',
+			expand: true,
+			nonull: true,
+			flatten: true,
+			filter: 'isFile'
+		}, {
+			src: 'lib/production/start.js',
+			dest: 'serve-production/js',
+			expand: true,
+			nonull: true,
+			flatten: true,
 			filter: 'isFile'
 		}, {
 			src: 'css/*',
 			expand: true,
-			dest: 'deploy/junto/static/css/',
-			flatten: true,
+			dest: 'serve-production/css/',
 			nonull: true,
+			flatten: true,
 			filter: 'isFile'
 		}, {
-			src: 'img/*',
+			src: 'img/**/*',
 			expand: true,
-			dest: 'deploy/junto/static/img/',
-			flatten: true,
+			dest: 'serve-production/img',
 			nonull: true,
+			flatten: true,
 			filter: 'isFile'
-		}, {
-			src: 'dist/junto.js',
-			dest: 'deploy/junto/static/js/dist/junto.js'
+		},
+		{
+			src: 'bower_components/**/*',
+			expand: true,
+			dest: 'serve-production/js/'
 		}]
 	}
 };

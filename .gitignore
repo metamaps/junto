@@ -1,10 +1,10 @@
 node_modules/
 dist/
 doc/
-serve/js
-serve/img
-serve/css
-css/
+serve-development/js
+serve-development/img
+serve-development/css
+css
 deploy/
 .grunt/
 bower_components/

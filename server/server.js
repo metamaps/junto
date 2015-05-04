@@ -12,6 +12,7 @@ var
 var httpApp = express();
 
 if (process.env.NODE_ENV == 'production') {
+  console.log(directory);
   httpApp.use(express.static(directory));
 }
 

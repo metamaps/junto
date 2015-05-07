@@ -29842,8 +29842,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
     var Handlers = {
         buttonClick: function() {
             if (this.isOpen) this.close();
-            else this.open();
-            this.isOpen = !this.isOpen;
+            else if (!this.isOpen) this.open();
         },
         videoToggleClick: function() {
             this.$videoToggle.toggleClass('active');
@@ -29953,6 +29952,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             right: '0'
         });
         this.$messageInput.focus();
+        this.isOpen = true;
     }
 
     chatView.prototype.close = function () {
@@ -29960,6 +29960,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             right: '-300px'
         });
         this.$messageInput.blur();
+        this.isOpen = false;
     }
 
     chatView.prototype.remove = function () {
@@ -30006,13 +30007,13 @@ C("Room", ["require", "exports", "module", "RoomTopicView", "ChatView", "VideoVi
         self.roomRef.child('topic').set(topic);
       });
 
-      this.map = new MapView(this);
-      this.roomRef.child('map').on('value', function(snap) {
-        self.setMap(snap.val());
-      });
-      $(document).on(MapView.events.change + '-' + this.room, function(event, map) {
-        self.roomRef.child('map').set(map);
-      });
+      //this.map = new MapView(this);
+      //this.roomRef.child('map').on('value', function(snap) {
+      ///  self.setMap(snap.val());
+      //});
+      //$(document).on(MapView.events.change + '-' + this.room, function(event, map) {
+      //  self.roomRef.child('map').set(map);
+      //});
 
       this.$myVideo = opts.$video;
       this.myVideo = opts.myVideoView;
@@ -30394,7 +30395,7 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
           room = rooms[index].room,
           $target = jQuery(target);
 
-      $target.append(room.map.$container);  
+      //$target.append(room.map.$container);  
       $target.append(room.chat.$container);
       $target.append(room.topic.$container);
 
@@ -30454,6 +30455,7 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
         });
         app.globalChat = new ChatView(app.globalMessages, mapper, 'global');
         jQuery('body').append(app.globalChat.$container);
+        app.globalChat.close();
 
         var sendChatMessage = function (event, data) {
           firebase.child('global').child('messages').push(data);
@@ -30766,7 +30768,7 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
     // these bigger surfaces get display when you click on one 
     // of the smaller ones to zoom in and focus on it
     for (var Va = Array(ma), T = 0; T < Va.length; T++) {
-      var xa = new E([1200, 800]);
+      var xa = new E([768, 576]);
       xa.Bb({
         backgroundColor: "rgba(73,160,154," + Sa[T] + ")"
       });

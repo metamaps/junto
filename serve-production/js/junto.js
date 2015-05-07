@@ -29575,28 +29575,20 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
         },
         audioControlClick: function() {
             if (this.audioStatus) {
-                this.$audioControl.css({
-                    'text-decoration': 'line-through'
-                });
+                this.$audioControl.addClass('active');
                 // mute it
             } else {
-                this.$audioControl.css({
-                    'text-decoration': 'none'
-                });
+                this.$audioControl.removeClass('active');
                 // unmute it
             }
             this.audioStatus = !this.audioStatus;
         },
         videoControlClick: function() {
             if (this.videoStatus) {
-                this.$videoControl.css({
-                    'text-decoration': 'line-through'
-                });
+                this.$videoControl.addClass('active');
                 // change the video feed to an avatar
             } else {
-                this.$videoControl.css({
-                    'text-decoration': 'none'
-                });
+                this.$videoControl.removeClass('active');
                 // change the avatar to the video feed
             }
             this.videoStatus = !this.videoStatus;
@@ -29624,13 +29616,18 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
         this.$container = $('<div></div>');
         this.$container.addClass('collaborator-video' + (isMyself ? ' my-video' : ''));
         this.$container.attr('id', 'container_' + id);
-        this.$container.append(this.video);
+        
+
+        var $vidContainer = $('<div></div>');
+        $vidContainer.addClass('video-cutoff');
+        $vidContainer.append(this.video);
+        this.$container.append($vidContainer);
 
         this.$container.on('mousedown', function (event) {
             Handlers.mousedown.call(self, event);
         });
-        this.$audioControl = $('<div class="video-audio">a</div>');
-        this.$videoControl = $('<div class="video-video">v</div>');
+        this.$audioControl = $('<div class="video-audio"></div>');
+        this.$videoControl = $('<div class="video-video"></div>');
 
         this.$audioControl.on('click', function () {
             Handlers.audioControlClick.call(self);
@@ -29814,6 +29811,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
                 date += " " + addZero(m.timestamp.getHours()) + ":" + addZero(m.timestamp.getMinutes());
             }
             m.timestamp = date;
+            m.image = m.image || 'https://pbs.twimg.com/profile_images/2811707669/36c2d8e5a484a429b803fa11f09e1c04.png';
             var html = this.messageTemplate(m);
             this.$messages.append(html);
         },
@@ -29827,19 +29825,33 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             var message = {
                 message: this.$messageInput.val(),
                 timestamp: Date.now(),
-                user: this.mapper.get('name')
+                user: this.mapper.get('name'),
+                image: this.mapper.get('image')
             };
             //this.add(message);
             this.$messageInput.val('');
             $(document).trigger(chatView.events.message + '-' + this.room, [message]);
+        },
+        addParticipant: function(participant) {
+            var p = _.clone(participant.attributes);
+            var html = this.participantTemplate(p);
+            this.$participants.append(html);
         }
     };
 
     var Handlers = {
         buttonClick: function() {
             if (this.isOpen) this.close();
-            else this.open();
-            this.isOpen = !this.isOpen;
+            else if (!this.isOpen) this.open();
+        },
+        videoToggleClick: function() {
+            this.$videoToggle.toggleClass('active');
+        },
+        cursorToggleClick: function() {
+            this.$cursorToggle.toggleClass('active');
+        },
+        soundToggleClick: function() {
+            this.$soundToggle.toggleClass('active');
         },
         keyUp: function(event) {
             switch(event.which) {
@@ -29856,6 +29868,12 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.room = room;
         this.mapper = mapper;
         this.messages = messages; // backbone collection
+
+        this.participants = new Backbone.Collection();
+        this.participants.on('add', function (participant) {
+            Private.addParticipant.call(self, participant);
+        });
+
         // add the event listener so that when
         // the realtime module adds messages to the collection
         // from other mappers, it will update the UI
@@ -29863,37 +29881,70 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             Private.addMessage.call(self, message);
         });
 
-        this.isOpen = false;
+        this.isOpen = true;
 
         var html = "<div class='chat-message'>" + 
-            "<div class='chat-message-user'><%= user %></div>" +
+            "<div class='chat-message-user'><img src='<%= image %>' /></div>" +
             "<div class='chat-message-text'><%= message %></div>" +
             "<div class='chat-message-time'><%= timestamp %></div>" +
             "<div class='clearfloat'></div>" +
           "</div>";
         this.messageTemplate = _.template(html);
+
+        var participant = "<div class='participant'>" + 
+            "<div class='chat-participant-image'><img src='<%= image %>' /></div>" +
+            "<div class='chat-participant-name'><%= username %></div>" +
+            "<div class='clearfloat'></div>" +
+          "</div>";
+        this.participantTemplate = _.template(participant);
         
         this.$button = $('<div class="chat-button"></div>');
         this.$messageInput = $('<textarea placeholder="Send a message..." class="chat-input"></textarea>');
+        this.$juntoHeader = $('<div class="junto-header">PARTICIPANTS</div>');
+        this.$videoToggle = $('<div class="video-toggle"></div>');
+        this.$cursorToggle = $('<div class="cursor-toggle"></div>');
+        this.$participants = $('<div class="participants"></div>');
+        this.$chatHeader = $('<div class="chat-header">CHAT</div>');
+        this.$soundToggle = $('<div class="sound-toggle"></div>');
         this.$messages = $('<div class="chat-messages"></div>');
 
         this.$button.on('click', function () {
             Handlers.buttonClick.call(self);
+        });
+        this.$videoToggle.on('click', function () {
+            Handlers.videoToggleClick.call(self);
+        });
+        this.$cursorToggle.on('click', function () {
+            Handlers.cursorToggleClick.call(self);
+        });
+        this.$soundToggle.on('click', function () {
+            Handlers.soundToggleClick.call(self);
         });
         this.$messageInput.on('keyup', function (event) {
             Handlers.keyUp.call(self, event);
         });
 
         this.$container = $('<div class="chat-box"></div>');
+        this.$container.append(this.$juntoHeader);
+        this.$juntoHeader.append(this.$videoToggle);
+        this.$juntoHeader.append(this.$cursorToggle);
+        this.$container.append(this.$participants);
+        this.$container.append(this.$chatHeader);
+        this.$chatHeader.append(this.$soundToggle);
         this.$container.append(this.$messageInput);
         this.$container.append(this.$button);
         this.$container.append(this.$messages);
+        
 
         Private.initialMessages.call(this);
     };
 
-    chatView.prototype.add = function (message) {
-        this.messages.add(message);
+    chatView.prototype.addParticipant = function (participant) {
+        this.participants.add(participant);
+    }
+
+    chatView.prototype.removeParticipant = function (participant) {
+        this.participants.remove(participant);
     }
 
     chatView.prototype.open = function () {
@@ -29901,13 +29952,15 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             right: '0'
         });
         this.$messageInput.focus();
+        this.isOpen = true;
     }
 
     chatView.prototype.close = function () {
         this.$container.css({
-            right: '-230px'
+            right: '-300px'
         });
         this.$messageInput.blur();
+        this.isOpen = false;
     }
 
     chatView.prototype.remove = function () {
@@ -29954,19 +30007,19 @@ C("Room", ["require", "exports", "module", "RoomTopicView", "ChatView", "VideoVi
         self.roomRef.child('topic').set(topic);
       });
 
-      this.map = new MapView(this);
-      this.roomRef.child('map').on('value', function(snap) {
-        self.setMap(snap.val());
-      });
-      $(document).on(MapView.events.change + '-' + this.room, function(event, map) {
-        self.roomRef.child('map').set(map);
-      });
+      //this.map = new MapView(this);
+      //this.roomRef.child('map').on('value', function(snap) {
+      ///  self.setMap(snap.val());
+      //});
+      //$(document).on(MapView.events.change + '-' + this.room, function(event, map) {
+      //  self.roomRef.child('map').set(map);
+      //});
 
       this.$myVideo = opts.$video;
       this.myVideo = opts.myVideoView;
 
       this.messages = new Backbone.Collection();
-      this.currentMapper = new Backbone.Model({ name: opts.username });
+      this.currentMapper = new Backbone.Model({ name: opts.username, image: opts.image });
       this.chat = new ChatView(this.messages, this.currentMapper, this.room);
 
       this.videos = {};
@@ -30200,6 +30253,7 @@ C("createRooms", ["require", "exports", "module", "Room"], function (require, ex
           firebase: opts.firebase.child('rooms').child(index),
           socket: opts.socket,
           username: opts.twitterUser.username, 
+          image: opts.twitterUser.cachedUserProfile.profile_image_url,
           room: index.toString(), 
           $video: opts.myVideo.$video,
           myVideoView: opts.myVideo.view,
@@ -30260,11 +30314,12 @@ C("6/1l", {
 
 
 
-C("app", "require exports module smallSurface auth createRooms localVideo ioconnection 0/4 0/c 0/2 0/9 0/e 0/f 0/1 0/5 0/7 0/6 0/g 1/i 1/j 1/s 1/r 1/p 1/l 1/q 1/n 1/o 1/m 3/14 3/15 3/16 3/19 3/1a 6/1i 6/1k 6/1j 2/z 4/1d 4/1c 6/1l 6/1l 6/1l 6/1l".split(" "), function(c, something, module) {
+C("app", "require exports module ChatView smallSurface auth createRooms localVideo ioconnection 0/4 0/c 0/2 0/9 0/e 0/f 0/1 0/5 0/7 0/6 0/g 1/i 1/j 1/s 1/r 1/p 1/l 1/q 1/n 1/o 1/m 3/14 3/15 3/16 3/19 3/1a 6/1i 6/1k 6/1j 2/z 4/1d 4/1c 6/1l 6/1l 6/1l 6/1l".split(" "), function(c, something, module) {
   
   var begin = function(firebase, socketUrl) {
 
     var
+      ChatView = c('ChatView'),
       IOconnection = c("ioconnection"),
       twUser = firebase.getAuth() || null,
       videoId = 'video-wrapper',
@@ -30295,8 +30350,20 @@ C("app", "require exports module smallSurface auth createRooms localVideo ioconn
         },
         webrtc: webrtc,
         localVideo: localVideo,
-        readyToCall: false
+        readyToCall: false,
+        globalMessages: new Backbone.Collection(),
+        globalChat: null
       };
+
+    firebase.child('global').child('messages').on('child_added', function (snap) {
+      app.globalMessages.add(snap.val());
+    });
+
+    socket.on('presence', function(presence) {
+      if (app.globalChat) {
+        app.globalChat.addParticipant(presence);
+      }
+    });
 
     socket.on('users_count', function(count) {
       app.stats.activePeople = count;
@@ -30319,10 +30386,6 @@ C("app", "require exports module smallSurface auth createRooms localVideo ioconn
       jQuery('body').append(localVideo.view.$container);
     });
 
-    //socket.connection.once('connect', function () {
-    //  socket.disconnect();
-    //});
-
     function joinRoomsCB(err, result) {
 
     }
@@ -30332,7 +30395,7 @@ C("app", "require exports module smallSurface auth createRooms localVideo ioconn
           room = rooms[index].room,
           $target = jQuery(target);
 
-      $target.append(room.map.$container);  
+      //$target.append(room.map.$container);  
       $target.append(room.chat.$container);
       $target.append(room.topic.$container);
 
@@ -30385,7 +30448,24 @@ C("app", "require exports module smallSurface auth createRooms localVideo ioconn
           myVideo: localVideo,
           socket: socket
         }, joinRoomsCB);
-        
+
+        var mapper = new Backbone.Model({ 
+          name: authData.twitter.username,
+          image: authData.twitter.cachedUserProfile.profile_image_url
+        });
+        app.globalChat = new ChatView(app.globalMessages, mapper, 'global');
+        jQuery('body').append(app.globalChat.$container);
+        app.globalChat.close();
+
+        var sendChatMessage = function (event, data) {
+          firebase.child('global').child('messages').push(data);
+        };
+        jQuery(document).on(ChatView.events.message + '-global', sendChatMessage);
+
+        socket.emit('setDetails', {
+          username: authData.twitter.username,
+          image: authData.twitter.cachedUserProfile.profile_image_url
+        });
 
         // hide the signup box
         //setTimeout(function () {
@@ -31208,6 +31288,8 @@ C("app", "require exports module smallSurface auth createRooms localVideo ioconn
     for (var i = 0; i < 120; i++) {
       socket.emit('requestRoomCount', i.toString());
     }
+
+
   }
 
   module.e = begin;

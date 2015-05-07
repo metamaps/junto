@@ -28,6 +28,14 @@ module.exports = function(io, stunservers) {
     io.sockets.on('connection', function (client) {
         activePeople += 1;
 
+        client.on('setDetails', function (details) {
+            client.profile = {
+                username: details.username,
+                image: details.image
+            };
+            client.broadcast.emit('presence', client.profile);
+        });
+
         client.resources = {
             screen: false,
             video: true,
@@ -140,5 +148,8 @@ module.exports = function(io, stunservers) {
 
         client.emit('rooms_count', Object.keys(activeRooms).length);
         io.sockets.emit('users_count', activePeople);
+        io.sockets.clients().forEach(function (socket) {
+            if (socket.id !== client.id && socket.profile) client.emit('presence', socket.profile);
+        });
     });
 };

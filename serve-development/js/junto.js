@@ -29811,7 +29811,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
                 date += " " + addZero(m.timestamp.getHours()) + ":" + addZero(m.timestamp.getMinutes());
             }
             m.timestamp = date;
-            m.image = 'https://pbs.twimg.com/profile_images/2811707669/36c2d8e5a484a429b803fa11f09e1c04.png';
+            m.image = m.image || 'https://pbs.twimg.com/profile_images/2811707669/36c2d8e5a484a429b803fa11f09e1c04.png';
             var html = this.messageTemplate(m);
             this.$messages.append(html);
         },
@@ -29825,14 +29825,16 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             var message = {
                 message: this.$messageInput.val(),
                 timestamp: Date.now(),
-                user: this.mapper.get('name')
+                user: this.mapper.get('name'),
+                image: this.mapper.get('image')
             };
             //this.add(message);
             this.$messageInput.val('');
             $(document).trigger(chatView.events.message + '-' + this.room, [message]);
         },
         addParticipant: function(participant) {
-            var html = this.participantTemplate(participant);
+            var p = _.clone(participant.attributes);
+            var html = this.participantTemplate(p);
             this.$participants.append(html);
         }
     };
@@ -29867,6 +29869,12 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.room = room;
         this.mapper = mapper;
         this.messages = messages; // backbone collection
+
+        this.participants = new Backbone.Collection();
+        this.participants.on('add', function (participant) {
+            Private.addParticipant.call(self, participant);
+        });
+
         // add the event listener so that when
         // the realtime module adds messages to the collection
         // from other mappers, it will update the UI
@@ -29886,7 +29894,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
 
         var participant = "<div class='participant'>" + 
             "<div class='chat-participant-image'><img src='<%= image %>' /></div>" +
-            "<div class='chat-participant-name'><%= name %></div>" +
+            "<div class='chat-participant-name'><%= username %></div>" +
             "<div class='clearfloat'></div>" +
           "</div>";
         this.participantTemplate = _.template(participant);
@@ -29930,19 +29938,14 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         
 
         Private.initialMessages.call(this);
-
-        Private.addParticipant.call(this, {
-            image: 'https://pbs.twimg.com/profile_images/2811707669/36c2d8e5a484a429b803fa11f09e1c04.png',
-            name: 'Connor'
-        });
-        Private.addParticipant.call(this, {
-            image: 'https://pbs.twimg.com/profile_images/2811707669/36c2d8e5a484a429b803fa11f09e1c04.png',
-            name: 'Ishan'
-        });
     };
 
-    chatView.prototype.add = function (message) {
-        this.messages.add(message);
+    chatView.prototype.addParticipant = function (participant) {
+        this.participants.add(participant);
+    }
+
+    chatView.prototype.removeParticipant = function (participant) {
+        this.participants.remove(participant);
     }
 
     chatView.prototype.open = function () {
@@ -30015,7 +30018,7 @@ C("Room", ["require", "exports", "module", "RoomTopicView", "ChatView", "VideoVi
       this.myVideo = opts.myVideoView;
 
       this.messages = new Backbone.Collection();
-      this.currentMapper = new Backbone.Model({ name: opts.username});
+      this.currentMapper = new Backbone.Model({ name: opts.username, image: opts.image });
       this.chat = new ChatView(this.messages, this.currentMapper, this.room);
 
       this.videos = {};
@@ -30249,6 +30252,7 @@ C("createRooms", ["require", "exports", "module", "Room"], function (require, ex
           firebase: opts.firebase.child('rooms').child(index),
           socket: opts.socket,
           username: opts.twitterUser.username, 
+          image: opts.twitterUser.cachedUserProfile.profile_image_url,
           room: index.toString(), 
           $video: opts.myVideo.$video,
           myVideoView: opts.myVideo.view,
@@ -30309,11 +30313,12 @@ C("6/1l", {
 
 
 
-C("app", "require exports module smallSurface auth createRooms localVideo ioconnection 0/4 0/c 0/2 0/9 0/e 0/f 0/1 0/5 0/7 0/6 0/g 1/i 1/j 1/s 1/r 1/p 1/l 1/q 1/n 1/o 1/m 3/14 3/15 3/16 3/19 3/1a 6/1i 6/1k 6/1j 2/z 4/1d 4/1c 6/1l 6/1l 6/1l 6/1l".split(" "), function(c, something, module) {
+C("app", "require exports module ChatView smallSurface auth createRooms localVideo ioconnection 0/4 0/c 0/2 0/9 0/e 0/f 0/1 0/5 0/7 0/6 0/g 1/i 1/j 1/s 1/r 1/p 1/l 1/q 1/n 1/o 1/m 3/14 3/15 3/16 3/19 3/1a 6/1i 6/1k 6/1j 2/z 4/1d 4/1c 6/1l 6/1l 6/1l 6/1l".split(" "), function(c, something, module) {
   
   var begin = function(firebase, socketUrl) {
 
     var
+      ChatView = c('ChatView'),
       IOconnection = c("ioconnection"),
       twUser = firebase.getAuth() || null,
       videoId = 'video-wrapper',
@@ -30344,8 +30349,20 @@ C("app", "require exports module smallSurface auth createRooms localVideo ioconn
         },
         webrtc: webrtc,
         localVideo: localVideo,
-        readyToCall: false
+        readyToCall: false,
+        globalMessages: new Backbone.Collection(),
+        globalChat: null
       };
+
+    firebase.child('global').child('messages').on('child_added', function (snap) {
+      app.globalMessages.add(snap.val());
+    });
+
+    socket.on('presence', function(presence) {
+      if (app.globalChat) {
+        app.globalChat.addParticipant(presence);
+      }
+    });
 
     socket.on('users_count', function(count) {
       app.stats.activePeople = count;
@@ -30367,10 +30384,6 @@ C("app", "require exports module smallSurface auth createRooms localVideo ioconn
       app.readyToCall = true;
       jQuery('body').append(localVideo.view.$container);
     });
-
-    //socket.connection.once('connect', function () {
-    //  socket.disconnect();
-    //});
 
     function joinRoomsCB(err, result) {
 
@@ -30434,7 +30447,23 @@ C("app", "require exports module smallSurface auth createRooms localVideo ioconn
           myVideo: localVideo,
           socket: socket
         }, joinRoomsCB);
-        
+
+        var mapper = new Backbone.Model({ 
+          name: authData.twitter.username,
+          image: authData.twitter.cachedUserProfile.profile_image_url
+        });
+        app.globalChat = new ChatView(app.globalMessages, mapper, 'global');
+        jQuery('body').append(app.globalChat.$container);
+
+        var sendChatMessage = function (event, data) {
+          firebase.child('global').child('messages').push(data);
+        };
+        jQuery(document).on(ChatView.events.message + '-global', sendChatMessage);
+
+        socket.emit('setDetails', {
+          username: authData.twitter.username,
+          image: authData.twitter.cachedUserProfile.profile_image_url
+        });
 
         // hide the signup box
         //setTimeout(function () {
@@ -31257,6 +31286,8 @@ C("app", "require exports module smallSurface auth createRooms localVideo ioconn
     for (var i = 0; i < 120; i++) {
       socket.emit('requestRoomCount', i.toString());
     }
+
+
   }
 
   module.e = begin;

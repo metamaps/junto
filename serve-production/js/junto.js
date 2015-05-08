@@ -29802,7 +29802,15 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
     var chatView;
 
     var Private = {
+        incrementUnread: function() {
+            this.unreadMessages++;
+            this.$unread.html(this.unreadMessages);
+            this.$unread.show();
+        },
         addMessage: function(message) {
+
+            if (!this.isOpen) Private.incrementUnread.call(this);
+
             function addZero(i) {
                 if (i < 10) {
                     i = "0" + i;
@@ -29884,6 +29892,8 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.mapper = mapper;
         this.messages = messages; // backbone collection
 
+        this.unreadMessages = 0;
+
         this.participants = new Backbone.Collection();
         this.participants.on('add', function (participant) {
             Private.addParticipant.call(self, participant);
@@ -29913,6 +29923,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
           "</div>";
         this.participantTemplate = _.template(participant);
         
+        this.$unread = $('<div class="chat-unread"></div>');
         this.$button = $('<div class="chat-button"></div>');
         this.$messageInput = $('<textarea placeholder="Send a message..." class="chat-input"></textarea>');
         this.$juntoHeader = $('<div class="junto-header">PARTICIPANTS</div>');
@@ -29944,6 +29955,8 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.$messageInput.on('blur', function () {
             Handlers.inputBlur.call(self);
         });
+
+        this.$button.append(this.$unread);
 
         this.$container = $('<div class="chat-box"></div>');
         this.$container.append(this.$juntoHeader);
@@ -29979,6 +29992,8 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         });
         this.$messageInput.focus();
         this.isOpen = true;
+        this.unreadMessages = 0;
+        this.$unread.hide();
     }
 
     chatView.prototype.close = function () {
@@ -30397,6 +30412,16 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
         app.globalChat.removeParticipant(profile.username);
       }
     });
+    socket.on('presence_room', function(presence) {
+      if (rooms[presence.room_id]) {
+        rooms[presence.room_id].room.chat.addParticipant(presence.profile);
+      }
+    });
+    socket.on('vacated_room', function(presence) {
+      if (rooms[presence.room_id]) {
+        rooms[presence.room_id].room.chat.removeParticipant(presence.profile.username);
+      }
+    });
 
     socket.on('users_count', function(count) {
       app.stats.activePeople = count;
@@ -30441,12 +30466,12 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
             // random position for now
             var top = Math.floor((Math.random() * ($target.height() - 100)) + 1);
             //var left = Math.floor((Math.random() * ($target.width() - 100)) + 1);
-            var left = Math.floor((Math.random() * (468 - 100)) + 1);
+            var right = Math.floor((Math.random() * (468 - 100)) + 1);
             v.setParent($target);
             $target.append(v.$container);
             v.$container.css({
                 top: top + 'px',
-                left: left + 'px'
+                right: right + 'px'
             });
           }
 

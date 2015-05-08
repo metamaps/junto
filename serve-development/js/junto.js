@@ -29802,7 +29802,15 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
     var chatView;
 
     var Private = {
+        incrementUnread: function() {
+            this.unreadMessages++;
+            this.$unread.html(this.unreadMessages);
+            this.$unread.show();
+        },
         addMessage: function(message) {
+
+            if (!this.isOpen) Private.incrementUnread.call(this);
+
             function addZero(i) {
                 if (i < 10) {
                     i = "0" + i;
@@ -29884,6 +29892,8 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.mapper = mapper;
         this.messages = messages; // backbone collection
 
+        this.unreadMessages = 0;
+
         this.participants = new Backbone.Collection();
         this.participants.on('add', function (participant) {
             Private.addParticipant.call(self, participant);
@@ -29913,6 +29923,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
           "</div>";
         this.participantTemplate = _.template(participant);
         
+        this.$unread = $('<div class="chat-unread"></div>');
         this.$button = $('<div class="chat-button"></div>');
         this.$messageInput = $('<textarea placeholder="Send a message..." class="chat-input"></textarea>');
         this.$juntoHeader = $('<div class="junto-header">PARTICIPANTS</div>');
@@ -29944,6 +29955,8 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.$messageInput.on('blur', function () {
             Handlers.inputBlur.call(self);
         });
+
+        this.$button.append(this.$unread);
 
         this.$container = $('<div class="chat-box"></div>');
         this.$container.append(this.$juntoHeader);
@@ -29979,6 +29992,8 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         });
         this.$messageInput.focus();
         this.isOpen = true;
+        this.unreadMessages = 0;
+        this.$unread.hide();
     }
 
     chatView.prototype.close = function () {

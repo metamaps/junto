@@ -30397,6 +30397,16 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
         app.globalChat.removeParticipant(profile.username);
       }
     });
+    socket.on('presence_room', function(presence) {
+      if (rooms[presence.room_id]) {
+        rooms[presence.room_id].room.chat.addParticipant(presence.profile);
+      }
+    });
+    socket.on('vacated_room', function(presence) {
+      if (rooms[presence.room_id]) {
+        rooms[presence.room_id].room.chat.removeParticipant(presence.profile.username);
+      }
+    });
 
     socket.on('users_count', function(count) {
       app.stats.activePeople = count;
@@ -30441,12 +30451,12 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
             // random position for now
             var top = Math.floor((Math.random() * ($target.height() - 100)) + 1);
             //var left = Math.floor((Math.random() * ($target.width() - 100)) + 1);
-            var left = Math.floor((Math.random() * (468 - 100)) + 1);
+            var right = Math.floor((Math.random() * (468 - 100)) + 1);
             v.setParent($target);
             $target.append(v.$container);
             v.$container.css({
                 top: top + 'px',
-                left: left + 'px'
+                right: right + 'px'
             });
           }
 

@@ -89,6 +89,12 @@ module.exports = function(io, stunservers) {
                     room_id: client.room,
                     count: io.sockets.clients(client.room).length
                 });
+                if (client.profile) {
+                    client.broadcast.emit('vacated_room', {
+                        room_id: client.room,
+                        profile: client.profile
+                    });
+                }
                 if (io.sockets.clients(client.room).length == 0) {
                     delete activeRooms[client.room];
                     io.sockets.emit('rooms_count', Object.keys(activeRooms).length);
@@ -109,6 +115,20 @@ module.exports = function(io, stunservers) {
             io.sockets.emit('room_count', {
                 room_id: name,
                 count: io.sockets.clients(name).length
+            });
+            if (client.profile) {
+                client.broadcast.emit('presence_room', {
+                    room_id: name,
+                    profile: client.profile
+                });
+            }
+            io.sockets.clients(name).forEach(function (s) {
+                if (s.profile) {
+                    client.emit('presence_room', {
+                        room_id: name,
+                        profile: s.profile
+                    });
+                }
             });
             client.room = name;
             activeRooms[name] = true;

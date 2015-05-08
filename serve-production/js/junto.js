@@ -30488,7 +30488,6 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
         });
         app.globalChat = new ChatView(app.globalMessages, mapper, 'global');
         var cHeight = jQuery('body').height() - 98 - 50 - 50 - 166 - 16; // input : header : header : participants : padding
-        console.log(cHeight);
         app.globalChat.$messages.height(cHeight);
         jQuery('body').append(app.globalChat.$container);
         app.globalChat.close();

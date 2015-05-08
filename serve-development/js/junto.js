@@ -29549,7 +29549,6 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
                 x: parseInt(this.$container.css('right'), '10'),
                 y: parseInt(this.$container.css('top'), '10')
             }
-            console.log(event.pageX);
 
             $(document).trigger(videoView.events.mousedown);
         },
@@ -29577,7 +29576,6 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
                 diffY = this.mouseMoveStart.y - event.pageY;
                 newX = this.posStart.x - diffX;
                 newY = this.posStart.y - diffY;
-                console.log(newX);
                 this.$container.css({
                     top: newY,
                     right: newX
@@ -29822,7 +29820,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
                 date += " " + addZero(m.timestamp.getHours()) + ":" + addZero(m.timestamp.getMinutes());
             }
             m.timestamp = date;
-            m.image = m.image || 'https://pbs.twimg.com/profile_images/2811707669/36c2d8e5a484a429b803fa11f09e1c04.png';
+            m.image = m.image || 'http://www.hotpepper.ca/wp-content/uploads/2014/11/default_profile_1_200x200.png';
             var html = this.messageTemplate(m);
             this.$messages.append(html);
         },
@@ -29870,6 +29868,12 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
                   Private.handleInputMessage.call(this);
                   break;
             }
+        },
+        inputFocus: function() {
+            $(document).trigger(chatView.events.inputFocus);
+        },
+        inputBlur: function() {
+            $(document).trigger(chatView.events.inputBlur);
         }
     };
 
@@ -29895,14 +29899,14 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.isOpen = true;
 
         var html = "<div class='chat-message'>" + 
-            "<div class='chat-message-user'><img src='<%= image %>' /></div>" +
+            "<div class='chat-message-user'><img src='<%= image %>' title='<%= user %>'/></div>" +
             "<div class='chat-message-text'><%= message %></div>" +
             "<div class='chat-message-time'><%= timestamp %></div>" +
             "<div class='clearfloat'></div>" +
           "</div>";
         this.messageTemplate = _.template(html);
 
-        var participant = "<div class='participant'>" + 
+        var participant = "<div class='participant participant-<%= username %>'>" + 
             "<div class='chat-participant-image'><img src='<%= image %>' /></div>" +
             "<div class='chat-participant-name'><%= username %></div>" +
             "<div class='clearfloat'></div>" +
@@ -29934,6 +29938,12 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.$messageInput.on('keyup', function (event) {
             Handlers.keyUp.call(self, event);
         });
+        this.$messageInput.on('focus', function () {
+            Handlers.inputFocus.call(self);
+        });
+        this.$messageInput.on('blur', function () {
+            Handlers.inputBlur.call(self);
+        });
 
         this.$container = $('<div class="chat-box"></div>');
         this.$container.append(this.$juntoHeader);
@@ -29954,8 +29964,13 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.participants.add(participant);
     }
 
-    chatView.prototype.removeParticipant = function (participant) {
-        this.participants.remove(participant);
+    chatView.prototype.removeParticipant = function (username) {
+        var p = this.participants.find(function (p) { return p.get('username') === username; });
+        if (p) {
+            this.participants.remove(p);
+            this.$container.find('.participant-' + username).remove();
+        }
+
     }
 
     chatView.prototype.open = function () {
@@ -29984,7 +29999,9 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
      * @static
      */
     chatView.events = {
-        message: 'ChatView:message'
+        message: 'ChatView:message',
+        inputFocus: 'ChatView:inputFocus',
+        inputBlur: 'ChatView:inputBlur'
     };
 
     module.e = chatView;
@@ -30375,6 +30392,11 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
         app.globalChat.addParticipant(presence);
       }
     });
+    socket.on('vacated', function(profile) {
+      if (app.globalChat) {
+        app.globalChat.removeParticipant(profile.username);
+      }
+    });
 
     socket.on('users_count', function(count) {
       app.stats.activePeople = count;
@@ -30465,8 +30487,19 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
           image: authData.twitter.cachedUserProfile.profile_image_url
         });
         app.globalChat = new ChatView(app.globalMessages, mapper, 'global');
+        var cHeight = jQuery('body').height() - 98 - 50 - 50 - 166 - 16; // input : header : header : participants : padding
+        app.globalChat.$messages.height(cHeight);
         jQuery('body').append(app.globalChat.$container);
         app.globalChat.close();
+
+        jQuery(document).on(ChatView.events.inputFocus, function () {
+          G = false;
+          if (K === -1) $.Ia(1); // switch the keyboard controls on/off, as long as you're not in a room
+        });
+        jQuery(document).on(ChatView.events.inputBlur, function () {
+          G = true;
+          if (K === -1) $.Ia(0); // switch the keyboard controls on/off, as long as you're not in a room
+        });
 
         var sendChatMessage = function (event, data) {
           firebase.child('global').child('messages').push(data);

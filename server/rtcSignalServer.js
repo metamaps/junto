@@ -121,6 +121,9 @@ module.exports = function(io, stunservers) {
             removeFeed();
             activePeople -= 1;
             io.sockets.emit('users_count', activePeople);
+            if (client.profile) {
+                io.sockets.emit('vacated', client.profile);
+            }
         });
         client.on('leave', function () {
             removeFeed();

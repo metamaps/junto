@@ -8,6 +8,7 @@ module.exports = {
 		  'bower_components/jquery/jquery.js',
 			'bower_components/underscore/underscore.js',
 			'bower_components/backbone/backbone.js',
+			'bower_components/howler/howler.js',
 			'bower_components/socket.io-client/dist/socket.io.js',
 			'bower_components/SimpleWebRTC/simplewebrtc.bundle.js',
 			'lib/libraries/require.js',

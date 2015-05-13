@@ -42,6 +42,13 @@ module.exports = {
 			nonull: true,
 			flatten: true,
 			filter: 'isFile'
+		}, {
+			src: 'sounds/**/*',
+			expand: true,
+			dest: 'serve-development/sounds',
+			nonull: true,
+			flatten: true,
+			filter: 'isFile'
 		}]
 	},
 	deploy: {
@@ -80,8 +87,14 @@ module.exports = {
 			nonull: true,
 			flatten: true,
 			filter: 'isFile'
-		},
-		{
+		}, {
+			src: 'sounds/**/*',
+			expand: true,
+			dest: 'serve-production/sounds',
+			nonull: true,
+			flatten: true,
+			filter: 'isFile'
+		}, {
 			src: 'bower_components/**/*',
 			expand: true,
 			dest: 'serve-production/js/'

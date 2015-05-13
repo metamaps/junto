@@ -29829,8 +29829,11 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             }
             m.timestamp = date;
             m.image = m.image || 'http://www.hotpepper.ca/wp-content/uploads/2014/11/default_profile_1_200x200.png';
-            var html = this.messageTemplate(m);
-            this.$messages.append(html);
+            var $html = $(this.messageTemplate(m));
+            this.$messages.append($html);
+            this.$messages.animate({
+                scrollTop: $html.offset().top
+            }, 200);
         },
         initialMessages: function() {
             var messages = this.messages.models;
@@ -29994,6 +29997,11 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.isOpen = true;
         this.unreadMessages = 0;
         this.$unread.hide();
+
+        var $lastMessage = this.$messages.find('.chat-message').last();
+        this.$messages.animate({
+            scrollTop: $lastMessage.offset().top
+        }, 200);
     }
 
     chatView.prototype.close = function () {
@@ -30455,6 +30463,7 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
 
       //$target.append(room.map.$container);  
       $target.append(room.chat.$container);
+      room.chat.open();
       $target.append(room.topic.$container);
 
       //if (app.readyToCall) {

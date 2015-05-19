@@ -30880,6 +30880,23 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
     var videoView;
 
     var Private = {
+        addControls: function() {
+            var self = this;
+
+            this.$audioControl = $('<div class="video-audio"></div>');
+            this.$videoControl = $('<div class="video-video"></div>');
+
+            this.$audioControl.on('click', function () {
+                Handlers.audioControlClick.call(self);
+            });
+
+            this.$videoControl.on('click', function () {
+                Handlers.videoControlClick.call(self);
+            });
+
+            this.$container.append(this.$audioControl);
+            this.$container.append(this.$videoControl);
+        },
         cancelClick: function() {
             this.mouseIsDown = false;
 
@@ -30939,22 +30956,22 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
         audioControlClick: function() {
             if (this.audioStatus) {
                 this.$audioControl.addClass('active');
-                // mute it
             } else {
                 this.$audioControl.removeClass('active');
-                // unmute it
             }
+            $(document).trigger(videoView.events.audioControlClick, [this]);
             this.audioStatus = !this.audioStatus;
         },
         videoControlClick: function() {
             if (this.videoStatus) {
                 this.$videoControl.addClass('active');
-                // change the video feed to an avatar
+                this.$avatar.show();
             } else {
                 this.$videoControl.removeClass('active');
-                // change the avatar to the video feed
+                this.$avatar.hide();
             }
             this.videoStatus = !this.videoStatus;
+            $(document).trigger(videoView.events.videoControlClick, [this]);
         }
     };
 
@@ -30984,24 +31001,17 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
         var $vidContainer = $('<div></div>');
         $vidContainer.addClass('video-cutoff');
         $vidContainer.append(this.video);
+
+        this.$avatar = $('<img class="collaborator-video-avatar" src="/img/default_profile.png" width="150" height="150" />');
+        $vidContainer.append(this.$avatar);
+
         this.$container.append($vidContainer);
 
         this.$container.on('mousedown', function (event) {
             Handlers.mousedown.call(self, event);
         });
-        this.$audioControl = $('<div class="video-audio"></div>');
-        this.$videoControl = $('<div class="video-video"></div>');
 
-        this.$audioControl.on('click', function () {
-            Handlers.audioControlClick.call(self);
-        });
-
-        this.$videoControl.on('click', function () {
-            Handlers.videoControlClick.call(self);
-        });
-
-        this.$container.append(this.$audioControl);
-        this.$container.append(this.$videoControl);
+        if (isMyself) Private.addControls.call(this);
 
         // suppress contextmenu
         this.video.oncontextmenu = function () { return false; };
@@ -31037,6 +31047,8 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
         mouseup: "VideoView:mouseup",
         doubleClick: "VideoView:doubleClick",
         dragEnd: "VideoView:dragEnd",
+        audioControlClick: "VideoView:audioControlClick",
+        videoControlClick: "VideoView:videoControlClick",
     };
 
     module.e = videoView;
@@ -31475,6 +31487,15 @@ C("Room", ["require", "exports", "module", "RoomTopicView", "ChatView", "VideoVi
 
         this.roomRef.child('messages').on('child_added', function (snap) {
           self.messages.add(snap.val());
+        });
+
+        $(document).on(VideoView.events.audioControlClick, function (event, videoView) {
+          if (!videoView.audioStatus) self.webrtc.mute();
+          else if (videoView.audioStatus) self.webrtc.unmute();
+        });
+        $(document).on(VideoView.events.videoControlClick, function (event, videoView) {
+          if (!videoView.videoStatus) self.webrtc.pauseVideo();
+          else if (videoView.videoStatus) self.webrtc.resumeVideo();
         });
 
         this.webrtc.webrtc.off('peerStreamAdded');

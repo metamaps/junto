@@ -31196,7 +31196,8 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             this.$messages.animate({
                 scrollTop: $html.offset().top
             }, 200);
-            //this.sound.play('laser');
+
+            if (this.alertSound) this.sound.play('laser');
         },
         initialMessages: function() {
             var messages = this.messages.models;
@@ -31211,7 +31212,6 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
                 user: this.mapper.get('name'),
                 image: this.mapper.get('image')
             };
-            //this.add(message);
             this.$messageInput.val('');
             $(document).trigger(chatView.events.message + '-' + this.room, [message]);
         },
@@ -31234,6 +31234,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             this.$cursorToggle.toggleClass('active');
         },
         soundToggleClick: function() {
+            this.alertSound = !this.alertSound;
             this.$soundToggle.toggleClass('active');
         },
         keyUp: function(event) {
@@ -31273,6 +31274,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         });
 
         this.isOpen = true;
+        this.alertSound = false;
 
         var html = "<div class='chat-message'>" + 
             "<div class='chat-message-user'><img src='<%= image %>' title='<%= user %>'/></div>" +
@@ -31297,7 +31299,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
         this.$cursorToggle = $('<div class="cursor-toggle"></div>');
         this.$participants = $('<div class="participants"></div>');
         this.$chatHeader = $('<div class="chat-header">CHAT</div>');
-        this.$soundToggle = $('<div class="sound-toggle"></div>');
+        this.$soundToggle = $('<div class="sound-toggle active"></div>');
         this.$messages = $('<div class="chat-messages"></div>');
 
         this.$button.on('click', function () {

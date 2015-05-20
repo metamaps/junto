@@ -31168,13 +31168,13 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
     var chatView;
 
     var Private = {
-        messageHTML: "<div class='chat-message'>" + 
+        messageHTML: "<div class='chat-message'>" +
             "<div class='chat-message-user'><img src='<%= image %>' title='<%= user %>'/></div>" +
             "<div class='chat-message-text'><%= message %></div>" +
             "<div class='chat-message-time'><%= timestamp %></div>" +
             "<div class='clearfloat'></div>" +
           "</div>",
-        participantHTML: "<div class='participant participant-<%= username %>'>" + 
+        participantHTML: "<div class='participant participant-<%= username %>'>" +
                 "<div class='chat-participant-image'><img src='<%= image %>' /></div>" +
                 "<div class='chat-participant-name'><%= username %></div>" +
                 "<div class='clearfloat'></div>" +

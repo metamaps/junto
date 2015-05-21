@@ -34040,10 +34040,7 @@ C("ChatView", ["require", "exports", "module"], function (require, exports, modu
             m.timestamp = new Date(m.timestamp);
 
             var date = (m.timestamp.getMonth() + 1) + '/' + m.timestamp.getDate();
-
-            if (today.getDate() == m.timestamp.getDate() && today.getMonth() == m.timestamp.getMonth() && today.getFullYear() == m.timestamp.getFullYear()) {
-                date += " " + addZero(m.timestamp.getHours()) + ":" + addZero(m.timestamp.getMinutes());
-            }
+            date += " " + addZero(m.timestamp.getHours()) + ":" + addZero(m.timestamp.getMinutes());
             m.timestamp = date;
             m.image = m.image || 'http://www.hotpepper.ca/wp-content/uploads/2014/11/default_profile_1_200x200.png';
             m.message = linker.link(m.message);

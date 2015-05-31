@@ -34444,12 +34444,10 @@ C("smallSurface", ["require", "exports", "module", "0/c"], function (require, k,
   
 
 C("auth", ["require", "exports", "module"], function (c, k, module) {
-  function auth(firebase, callback) {
-    firebase.authWithOAuthRedirect("twitter", function(error, authData) {
+  function auth(firebase, provider, callback) {
+    firebase.authWithOAuthRedirect(provider, function(error) {
       if (error) {
         callback(error);
-      } else {
-        callback(null, authData);
       }
     });
   }
@@ -34463,7 +34461,17 @@ C("createRooms", ["require", "exports", "module", "Room"], function (require, ex
 
   var Room = require("Room");
 
-  function start(opts, callback) {
+  function getUsername(user, provider) {
+    if (provider === 'twitter') return user.username;
+    else if (provider === 'google') return user.displayName;
+  }
+
+  function getImage(user, provider) {
+    if (provider === 'twitter') return user.cachedUserProfile.profile_image_url;
+    else if (provider === 'google') return user.cachedUserProfile.picture;
+  }
+
+  function start(opts, provider, callback) {
     opts.firebase.child('rooms').once('value', function (snap) {
       var rms = snap.val();
       
@@ -34472,8 +34480,8 @@ C("createRooms", ["require", "exports", "module", "Room"], function (require, ex
           webrtc: opts.webrtc,
           firebase: opts.firebase.child('rooms').child(index),
           socket: opts.socket,
-          username: opts.twitterUser.username, 
-          image: opts.twitterUser.cachedUserProfile.profile_image_url,
+          username: getUsername(opts.user, provider),
+          image: getImage(opts.user, provider),
           room: index.toString(), 
           $video: opts.myVideo.$video,
           myVideoView: opts.myVideo.view,
@@ -34541,7 +34549,7 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
     var
       ChatView = c('ChatView'),
       IOconnection = c("ioconnection"),
-      twUser = firebase.getAuth() || null,
+      authUser = firebase.getAuth() || null,
       videoId = 'video-wrapper',
       localVideo = c("localVideo")({ id: videoId }),
       socket = new IOconnection({ url: socketUrl }),
@@ -34664,30 +34672,11 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
       }*/
     }
 
-    function authCB(err, authData) { 
-      if (!err) {
-        
-        if (!twUser) twUser = authData;
-        // .pa means setSize
-        //twLogin.pa([250, ]);
-        twLogin.R("<p>Welcome " + authData.twitter.username + ".</p>");
-        delete twLogin.pb.fc.click; // remove the click listener
-        //twMod.Ua(); // hide the twitter login button by hiding its modifier
 
-        ;
-        //start joining rooms
-        webrtc.startLocalVideo();
-        c("createRooms")({
-          webrtc: webrtc,
-          firebase: firebase,
-          twitterUser: twUser.twitter,
-          myVideo: localVideo,
-          socket: socket
-        }, joinRoomsCB);
-
+    function init(username, image) {
         var mapper = new Backbone.Model({ 
-          name: authData.twitter.username,
-          image: authData.twitter.cachedUserProfile.profile_image_url
+          name: username,
+          image: image
         });
         app.globalChat = new ChatView(app.globalMessages, mapper, 'global');
         var cHeight = jQuery('body').height() - 98 - 50 - 50 - 166 - 16; // input : header : header : participants : padding
@@ -34708,28 +34697,78 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
           firebase.child('global').child('messages').push(data);
         };
         jQuery(document).on(ChatView.events.message + '-global', sendChatMessage);
+    }
+
+    function twAuthCB(err, authData) {
+      if (!err) {
+
+        if (!authUser) authUser = authData;
+        // .pa means setSize
+        //twLogin.pa([250, ]);
+        twLogin.R("<p>Welcome " + authData.twitter.username + ".</p>");
+        delete twLogin.pb.fc.click; // remove the click listener
+        googleMod.Ua(); // hide the google login button by hiding its modifier
+
+        //start joining rooms
+        webrtc.startLocalVideo();
+        c("createRooms")({
+          webrtc: webrtc,
+          firebase: firebase,
+          user: authUser.twitter,
+          myVideo: localVideo,
+          socket: socket
+        }, 'twitter', joinRoomsCB);
+
+        init(authData.twitter.username, authData.twitter.cachedUserProfile.profile_image_url);
 
         socket.emit('setDetails', {
           username: authData.twitter.username,
           image: authData.twitter.cachedUserProfile.profile_image_url
         });
 
-        // hide the signup box
-        //setTimeout(function () {
-        //  closeSignup();
-        //}, 3000);
-
-        //setTimeout(function () {
-        //  socket.connection.socket.connect();
-        //}, 5000);
-
       } else {
         twLogin.R("<button>Oopsy. Error. Try again?</button>");
       }
     }
 
-    function loginClick() {
-      c("auth")(firebase, authCB);
+    function googleAuthCB(err, authData) {
+      if (!err) {
+
+        if (!authUser) authUser = authData;
+        // .pa means setSize
+        //twLogin.pa([250, ]);
+
+        googleLogin.R("<p>Welcome " + authData.google.displayName + ".</p>");
+        delete googleLogin.pb.fc.click; // remove the click listener
+        twMod.Ua(); // hide the twitter login button by hiding its modifier
+
+        //start joining rooms
+        webrtc.startLocalVideo();
+        c("createRooms")({
+          webrtc: webrtc,
+          firebase: firebase,
+          user: authUser.google,
+          myVideo: localVideo,
+          socket: socket
+        }, 'google', joinRoomsCB);
+
+        init(authData.google.displayName, authData.google.cachedUserProfile.picture);
+
+        socket.emit('setDetails', {
+          username: authData.google.displayName,
+          image: authData.google.cachedUserProfile.picture
+        });
+
+      } else {
+        googleLogin.R("<button>Oopsy. Error. Try again?</button>");
+      }
+    }
+
+    function loginClick(provider) {
+      return function () {
+        if (provider == 'twitter') c("auth")(firebase, provider, twAuthCB);
+        else if (provider == 'google') c("auth")(firebase, provider, googleAuthCB);
+      };
     }
 
     // c = require
@@ -35345,8 +35384,23 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
 
     var twLogin = new E([250, 50], '<button>Login with Twitter</button>');
     twLogin.j("twitter-login");
+    twLogin.j("user-login");
     twLogin.m(new L);
-    twLogin.k("click", loginClick);
+    twLogin.k("click", loginClick('twitter'));
+
+    // sign in with twitter
+    var googleMod = new la(0, {
+      duration: 700,
+      h: k
+    });
+    googleMod.show();
+
+    var googleLogin = new E([250, 50], '<button>Login with Google</button>');
+    googleLogin.j("google-login");
+    googleLogin.j("user-login");
+    googleLogin.m(new L);
+    googleLogin.k("click", loginClick('google'));
+
 
     var Ea = new E([120, 30], "Welcome!");
     Ea.j("signup-show");
@@ -35364,8 +35418,16 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
 
     na.i(new u(m.translate(0, 210, 0.01))).f(X);
     na.i(new u(m.translate(275, -225, 0.01))).f(Da);
-    na.i(new u(m.translate(110, 90, 0.01))).f(twMod).f(twLogin);
-    na.i(new u(m.translate(138, 170, 0.01))).f(credit);
+
+    if (!authUser) {
+      na.i(new u(m.translate(110, 90, 0.01))).f(twMod).f(twLogin);
+      na.i(new u(m.translate(110, 150, 0.01))).f(googleMod).f(googleLogin);
+      na.i(new u(m.translate(138, 220, 0.01))).f(credit);
+    } else {
+      if (authUser.provider === 'twitter') na.i(new u(m.translate(110, 90, 0.01))).f(twMod).f(twLogin);
+      else if (authUser.provider === 'google') na.i(new u(m.translate(110, 90, 0.01))).f(googleMod).f(googleLogin);
+      na.i(new u(m.translate(138, 170, 0.01))).f(credit);
+    }
 
     window.addEventListener("submit", function(a) {
       a.preventDefault();
@@ -35531,7 +35593,18 @@ C("app", "require exports module ChatView smallSurface auth createRooms localVid
     // 4 is paraflow
     // 3 is periodic table
     b(4);
-    if (twUser) authCB(null, twUser);
+
+    // initialize with auth
+    //firebase.unauth();
+    if (authUser && authUser.provider === 'twitter') twAuthCB(null, authUser);
+    else if (authUser && authUser.provider === 'google') googleAuthCB(null, authUser);
+    else {
+      firebase.onAuth(function (authData) {
+        if (authData && authData.provider === 'twitter') twAuthCB(null, authData);
+        else if (authData && authData.provider === 'google') googleAuthCB(null, authData);
+      });
+    }
+
     for (var i = 0; i < 120; i++) {
       socket.emit('requestRoomCount', i.toString());
     }

@@ -33764,8 +33764,9 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
         $vidContainer.addClass('video-cutoff');
         $vidContainer.append(this.video);
 
-        this.$avatar = $('<img class="collaborator-video-avatar" src="/img/default_profile.png" width="150" height="150" />');
+        this.$avatar = $('<img draggable="false" class="collaborator-video-avatar" src="/img/default_profile.png" width="150" height="150" />');
         $vidContainer.append(this.$avatar);
+        this.$avatar.show();
 
         this.$container.append($vidContainer);
 
@@ -34579,7 +34580,7 @@ C("app", "require exports module RoomTopicView ChatView smallSurface auth create
         localVideoEl: videoId,
         remoteVideosEl: '',
         detectSpeakingEvents: true,
-        autoAdjustMic: false,
+        autoAdjustMic: true,
         autoRequestMedia: false,
         localVideo: {
             autoplay: true,
@@ -34587,7 +34588,7 @@ C("app", "require exports module RoomTopicView ChatView smallSurface auth create
             muted: true
         },
         media: {
-          video: true,
+          video: false,
           audio: true
         }
       });

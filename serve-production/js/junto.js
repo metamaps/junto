@@ -33766,7 +33766,6 @@ C("VideoView", ["require", "exports", "module"], function (require, exports, mod
 
         this.$avatar = $('<img draggable="false" class="collaborator-video-avatar" src="/img/default_profile.png" width="150" height="150" />');
         $vidContainer.append(this.$avatar);
-        this.$avatar.show();
 
         this.$container.append($vidContainer);
 

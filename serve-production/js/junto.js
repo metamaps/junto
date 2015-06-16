@@ -34588,7 +34588,7 @@ C("app", "require exports module RoomTopicView ChatView smallSurface auth create
             muted: true
         },
         media: {
-          video: false,
+          video: true,
           audio: true
         }
       });

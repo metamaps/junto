@@ -1,5 +1,15 @@
 {
   "ignore": [
     "lib/libraries/**"
-  ]
+  ],
+  "test": [
+    "**/test/**",
+    "**/tests/**",
+    "**/spec/**",
+    "**/specs/**"
+  ],
+  "dependencies": {
+    "unused-ignores": [],
+    "mute": []
+  }
 }
